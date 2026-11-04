@@ -18,6 +18,16 @@ El proxy necesita `GROQ_API_KEY` en Vercel (Production). Para cambiarla:
 cd proxy
 vercel env rm GROQ_API_KEY production
 printf '%s' 'gsk_...' | vercel env add GROQ_API_KEY production
+```
+
+Si Vercel bloquea el deploy por el autor de Git (el proyecto está en la cuenta de Liseth), despliega desde una copia temporal sin la carpeta `.git`:
+
+```bash
+rm -rf /tmp/nu-proxy-deploy && mkdir -p /tmp/nu-proxy-deploy/api
+cp proxy/api/groq.js /tmp/nu-proxy-deploy/api/
+cp proxy/package.json proxy/vercel.json /tmp/nu-proxy-deploy/
+cd /tmp/nu-proxy-deploy
+vercel link --yes --project nu-interview-lab-api
 vercel --prod
 ```
 
