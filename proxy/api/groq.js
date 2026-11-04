@@ -7,6 +7,35 @@ const ALLOWED_ORIGINS = new Set([
   'null',
 ]);
 
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 8;
+const rateBuckets = new Map();
+
+function isRateLimited(req) {
+  const ip =
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    'unknown';
+  const now = Date.now();
+  const bucket = rateBuckets.get(ip);
+
+  if (!bucket || now - bucket.start > RATE_WINDOW_MS) {
+    rateBuckets.set(ip, { start: now, count: 1 });
+    return false;
+  }
+
+  bucket.count += 1;
+  if (bucket.count > RATE_MAX) return true;
+
+  if (rateBuckets.size > 1000) {
+    for (const [key, value] of rateBuckets) {
+      if (now - value.start > RATE_WINDOW_MS) rateBuckets.delete(key);
+    }
+  }
+
+  return false;
+}
+
 function applyCors(req, res) {
   const origin = req.headers.origin || '';
   const allowed = ALLOWED_ORIGINS.has(origin);
@@ -34,6 +63,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!allowed) return res.status(403).json({ error: 'Origin not allowed' });
   if (req.headers['x-nu-lab'] !== '1') return res.status(403).json({ error: 'Missing app header' });
+  if (isRateLimited(req)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({ error: 'Too many requests. Please wait a minute.' });
+  }
 
   const endpoint = req.query.endpoint;
   const isTranscribe = endpoint === 'transcribe';
