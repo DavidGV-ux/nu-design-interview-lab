@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nu Design Interview Lab · Liseth</title>
+<style>
+:root{--p:#820ad1;--p2:#a64be0;--bg:#f5f0fb;--tx:#2b1442;--mut:#6b5b7b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:26px 18px;text-align:center}
+header h1{margin:0;font-size:1.6rem}header p{margin:6px 0 0;opacity:.9}
+.bar{position:sticky;top:0;z-index:9;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;align-items:center}
+.bar button{border:0;background:#efe3fa;color:var(--p);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+.bar button.on{background:var(--p);color:#fff}.sp{flex:1}
+.lang button{background:#fff;border:2px solid var(--p)}.lang button.on{background:var(--p)}
+main{max-width:1050px;margin:18px auto;padding:0 14px 60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(130,10,209,.12)}
+.card h3{margin:0 0 8px;color:var(--p)}.card p,.card li{line-height:1.55}
+.tag{display:inline-block;background:#efe3fa;color:var(--p);border-radius:999px;padding:2px 10px;font-size:.78rem;margin-right:4px}
+.tip{background:#fff7e0;border-left:4px solid #f5b400;padding:8px 12px;border-radius:8px;margin-top:8px;font-size:.92rem}
+details{margin-top:8px}summary{cursor:pointer;font-weight:600;color:var(--p)}
+textarea,input,select{width:100%;padding:10px;border:1px solid #cdb6e6;border-radius:10px;font:inherit}
+textarea{min-height:110px}
+.btn{background:var(--p);color:#fff;border:0;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;margin:4px 4px 4px 0}
+.btn.red{background:#d32f2f}.btn.gray{background:#8b7a9b}.btn:disabled{opacity:.5}
+.out{white-space:pre-wrap;background:#faf6ff;border:1px solid #e3d3f4;border-radius:12px;padding:14px;margin-top:10px;line-height:1.55}
+.stat{display:inline-block;background:#efe3fa;border-radius:10px;padding:6px 12px;margin:3px}
+.hide{display:none}.sec{display:none}.sec.on{display:block}
+.q{border-top:1px solid #eee;padding:10px 0}
+audio{width:100%;margin-top:8px}
+small{color:var(--mut)}
+.bear{position:fixed;right:18px;bottom:18px;z-index:50;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bear .bubble{background:#fff;color:#2b1442;border-radius:16px;padding:10px 14px;max-width:230px;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.15);opacity:0;transform:translateY(6px);transition:.3s}
+.bear .bubble.show{opacity:1;transform:none}
+.bear svg{width:120px;height:120px;filter:drop-shadow(0 6px 10px rgba(130,10,209,.25))}
+.bear svg .arm{transform-origin:60% 40%;animation:wave 2.6s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+.bear .heart{position:absolute;right:8px;top:-6px;font-size:18px;opacity:0;animation:pop 1.6s ease-out infinite}
+@keyframes pop{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-18px)}}
+</style></head><body>
+<header><h1>Nu Design Interview Lab 💜</h1><p id="sub"></p></header>
+<div class="bar" id="bar"></div>
+<main id="main"></main>
+<div class="bear" id="bear"><div class="bubble" id="bb"></div><div style="position:relative"><span class="heart">💜</span>
+<svg viewBox="0 0 120 120"><circle cx="38" cy="30" r="16" fill="#820ad1"/><circle cx="82" cy="30" r="16" fill="#820ad1"/><circle cx="38" cy="30" r="8" fill="#c9a0f0"/><circle cx="82" cy="30" r="8" fill="#c9a0f0"/><circle cx="60" cy="62" r="34" fill="#820ad1"/><ellipse cx="60" cy="70" rx="20" ry="15" fill="#c9a0f0"/><circle cx="48" cy="54" r="4.5" fill="#fff"/><circle cx="72" cy="54" r="4.5" fill="#fff"/><circle cx="49" cy="55" r="2.2" fill="#2b1442"/><circle cx="71" cy="55" r="2.2" fill="#2b1442"/><ellipse cx="60" cy="68" rx="6" ry="4.5" fill="#2b1442"/><path d="M60 72 q-4 4 -8 1" stroke="#2b1442" stroke-width="2" fill="none"/><path class="arm" d="M28 70 q-12 8 -6 20" stroke="#820ad1" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M92 70 q12 8 6 20" stroke="#820ad1" stroke-width="10" fill="none" stroke-linecap="round"/></svg></div></div>
+<script>
+let L='es';
+const API_BASE='https://nu-interview-lab-api.vercel.app';
+const GROQ_MODEL='qwen/qwen3.8-27b';
+const GROQ_STT='whisper-large-v3-turbo';
+const FEEDBACK_LANG='Spanish';
+const T=(o)=>o[L]||o.en;
+const tabs=[
+ ['res',{es:'1 · Investigación Nu',en:'1 · Nu Research'}],
+ ['pitch',{es:'2 · Mi presentación',en:'2 · My Pitch'}],
+ ['learn',{es:'3 · Mi aprendizaje',en:'3 · My Learning'}],
+ ['proj',{es:'4 · Proyectos (STAR)',en:'4 · Projects (STAR)'}],
+ ['qa',{es:'5 · Preguntas que me harán',en:'5 · Questions I may get'}],
+ ['ask',{es:'6 · Preguntas para el gerente',en:'6 · Questions to ask'}],
+ ['lab',{es:'7 · Práctica con IA',en:'7 · AI Practice'}],
+ ['chk',{es:'8 · Checklist',en:'8 · Checklist'}]
+];
+const D={
+res:[
+ {t:{es:'Quién es Nu',en:'Who Nu is'},b:{es:'Nu atiende a más de 140 millones de clientes en Brasil, México y Colombia. Su misión es luchar contra la complejidad para empoderar a las personas. Nació en 2013 en una casa-garaje en São Paulo.',en:'Nu serves more than 140 million customers in Brazil, Mexico and Colombia. Its mission is to fight complexity to empower people. It started in 2013 in a small house-garage in São Paulo.'}},
+ {t:{es:'Qué hace el equipo de Diseño',en:'What the Design team does'},b:{es:'Según las ofertas de Product Designer, el equipo lleva el producto desde la ideación hasta el lanzamiento. Convierte problemas complejos en experiencias intuitivas, accesibles y fáciles para millones de personas. Trabaja con diseñadores, investigadores, analistas, ingenieros y product managers.',en:'In Nu product designer job posts, the team drives product from ideation to full rollout. It turns complex problems into intuitive, accessible, easy experiences for millions. It works with designers, researchers, analysts, engineers and product managers.'}},
+ {t:{es:'Qué buscan en una persona',en:'What they look for'},b:{es:'Humildad, ganas fuertes de aprender, colaborar con personas distintas, dar buen feedback y aplicar el feedback crítico. No esperan que llegues experta en todo.',en:'Humility, a strong desire to learn, collaboration with different people, giving good feedback and applying critical feedback. They do not expect you to arrive as an expert in everything.'}},
+ {t:{es:'Los 5 valores (úsalos con ejemplos)',en:'The 5 values (use them with examples)'},b:{es:'1) Clientes que nos amen. 2) Hambre y desafiar el statu quo. 3) Pensar como dueños. 4) Equipos fuertes y diversos. 5) Eficiencia inteligente.',en:'1) Customers who love us. 2) Hunger, challenge the status quo. 3) Think like owners. 4) Strong, diverse teams. 5) Smart efficiency.'}},
+ {t:{es:'Datos de diseño para mencionar',en:'Design facts to mention'},b:{es:'Nu tiene un sistema de diseño propio (NuDS) y una herramienta interactiva de brand guidelines. En su blog técnico hablan de UX Research y de entender bien el problema antes de resolverlo. El nombre "Nu" evoca transparencia, y un ejemplo es un patrón de carga que explica qué datos se usan para evaluar un aumento de cupo.',en:'Nu has its own design system (NuDS) and an interactive brand guidelines tool. Its engineering blog talks about UX Research and framing the problem before solving it. "Nu" evokes transparency, and one example is a loading pattern that explains which data is used to evaluate a credit limit increase.'}},
+ {t:{es:'Cuidado',en:'Careful'},b:{es:'Verifica en nu.com.co y en LinkedIn los datos más recientes antes de la entrevista. Si no estás segura de una cifra, no la digas; mejor di "I read that…".',en:'Check nu.com.co and LinkedIn for the latest facts before the interview. If you are unsure of a number, do not say it; say "I read that…".'}}
+],
+pitch:[
+ {t:{es:'Versión 30 segundos',en:'30-second version'},b:{es:'Hi, I\'m Liseth Rairán, a Multimedia Engineering student at Universidad de Boyacá. I design and build digital products: UX/UI, prototypes, AR and web apps. I did an exchange in Mexico in 2025, and I have worked as a freelancer since 2024. I want to learn and grow in Nu\'s Design team.\n\n(Léela en inglés; es el guion real.)',en:'Hi, I\'m Liseth Rairán, a Multimedia Engineering student at Universidad de Boyacá. I design and build digital products: UX/UI, prototypes, AR and web apps. I did an exchange in Mexico in 2025, and I have worked as a freelancer since 2024. I want to learn and grow in Nu\'s Design team.'}},
+ {t:{es:'Versión 1 minuto',en:'1-minute version'},b:{es:'Hello, and thank you for your time. I\'m Liseth, from Colombia. I study Multimedia Engineering, so I mix design and code. I do UX research, wireframes, prototypes, and I also build apps with Angular, Ionic and Unity. In 2025 I studied in Tlaxcala, Mexico. I learned to adapt fast and to work with new people. I have also led freelance projects with Scrum and delivered on time. What I like about Nu is the mission: fight complexity. I want to make finance simple and human for people.',en:'Hello, and thank you for your time. I\'m Liseth, from Colombia. I study Multimedia Engineering, so I mix design and code. I do UX research, wireframes, prototypes, and I also build apps with Angular, Ionic and Unity. In 2025 I studied in Tlaxcala, Mexico. I learned to adapt fast and to work with new people. I have also led freelance projects with Scrum and delivered on time. What I like about Nu is the mission: fight complexity. I want to make finance simple and human for people.'}},
+ {t:{es:'Versión 2 minutos (con historia)',en:'2-minute version (with story)'},b:{es:'Todo lo del minuto, más: "Since I was a little girl, I wanted to go far and not just settle. It was not easy: in my family, people often underestimated me, and engineering is a tough field. But that made me resilient. I am still standing, I lead, and I keep learning. At Nu I want to become the best at my craft and innovate with your values."',en:'Everything in the 1-minute version, plus: "Since I was a little girl, I wanted to go far and not just settle. It was not easy: in my family, people often underestimated me, and engineering is a tough field. But that made me resilient. I am still standing, I lead, and I keep learning. At Nu I want to become the best at my craft and innovate with your values."'}},
+ {t:{es:'Mi intercambio en 20 segundos',en:'My exchange in 20 seconds'},b:{es:'"In 2025 I did an exchange at Universidad Autónoma de Tlaxcala in Mexico. It taught me to adapt to a new culture, ask for help, and work with people who think differently. Nu is in Mexico too, so I understand how users can change from country to country."',en:'"In 2025 I did an exchange at Universidad Autónoma de Tlaxcala in Mexico. It taught me to adapt to a new culture, ask for help, and work with people who think differently. Nu is in Mexico too, so I understand how users can change from country to country."'}},
+ {t:{es:'Consejos de entrega',en:'Delivery tips'},b:{es:'Habla despacio, haz pausas en vez de "eh/um", frases cortas (tu inglés B2 alcanza de sobra). Sonríe, y termina siempre con una frase de cierre clara.',en:'Speak slowly, pause instead of "uh/um", use short sentences (your B2 English is enough). Smile, and always end with a clear closing line.'}}
+],
+learn:[
+ {t:{es:'Cómo aprendo',en:'How I learn'},b:{es:'"I learn by building. I start with a real problem, make a prototype, test it, and improve it. When I don\'t know something, I look for documentation, ask for feedback, and try again."',en:'"I learn by building. I start with a real problem, make a prototype, test it, and improve it. When I don\'t know something, I look for documentation, ask for feedback, and try again."'}},
+ {t:{es:'Diseño + código',en:'Design + code'},b:{es:'"My degree lets me connect design and development. I know Photoshop, Lightroom, Premiere and Blender, but also Python, JavaScript, TypeScript, Angular and Unity. So I can talk with engineers using their language and design things that are possible to build."',en:'"My degree lets me connect design and development. I know Photoshop, Lightroom, Premiere and Blender, but also Python, JavaScript, TypeScript, Angular and Unity. So I can talk with engineers using their language and design things that are possible to build."'}},
+ {t:{es:'IA como herramienta',en:'AI as a tool'},b:{es:'"I use prompt engineering and generative AI to be more productive, but I always review the result. The decisions and the empathy for the user are mine."',en:'"I use prompt engineering and generative AI to be more productive, but I always review the result. The decisions and the empathy for the user are mine."'}},
+ {t:{es:'Lo que quiero aprender en Nu',en:'What I want to learn at Nu'},b:{es:'Diseño a gran escala (design systems como NuDS), investigación con datos reales, experimentación (test & learn) y trabajo con equipos de varios países.',en:'Design at scale (design systems like NuDS), research with real data, experimentation (test & learn) and working with teams from several countries.'}},
+ {t:{es:'Mi debilidad (honesta)',en:'My weakness (honest)'},b:{es:'"I sometimes want to polish too much. I am learning to ship early, get feedback, and iterate." Usa algo que sea verdad para ti.',en:'"I sometimes want to polish too much. I am learning to ship early, get feedback, and iterate." Use something that is true for you.'}}
+],
+proj:[
+ {t:{es:'Rediseño de plataforma web de domicilios',en:'Delivery web platform redesign'},b:{es:'S: la plataforma era lenta y poco clara en móvil. T: mejorar la experiencia. A: investigación de usuario, wireframes, prototipo, UI e implementación. R: página más ágil, accesible y optimizada para móviles, con menos tiempos de carga.',en:'S: the platform was slow and unclear on mobile. T: improve the experience. A: user research, wireframes, prototype, UI and implementation. R: a faster, more accessible, mobile-optimized site with shorter load times.'}},
+ {t:{es:'Experiencia de Realidad Aumentada (Unity + Vuforia)',en:'Augmented Reality experience (Unity + Vuforia)'},b:{es:'S: marca que quería una experiencia interactiva. T: unir lo físico y lo digital. A: tarjetas físicas que activan un objeto 3D, botones y video en Android. R: experiencia interactiva funcional. Muestra creatividad + código.',en:'S: a brand wanted an interactive experience. T: connect physical and digital. A: physical cards that trigger a 3D object, buttons and video on Android. R: a working interactive experience. Shows creativity + code.'}},
+ {t:{es:'Campaña 50 años — Pollos El Dorado (2023)',en:'50-year campaign — Pollos El Dorado (2023)'},b:{es:'S: aniversario de la marca. T: contar su historia. A: foto y video, narrativa emotiva, análisis de métricas de alcance para ajustar formato. R: material para redes e institucional.',en:'S: the brand\'s anniversary. T: tell its story. A: photo and video, emotional narrative, reach metrics to adjust format. R: content for social and institutional use.'}},
+ {t:{es:'Freelance (2024–hoy)',en:'Freelance (2024–now)'},b:{es:'Gestiono clientes con Scrum y he cumplido el 100% de los plazos acordados (dato de tu CV; úsalo solo si es verdad). Aprendí a negociar alcance y comunicar avances.',en:'I manage clients with Scrum and met 100% of agreed deadlines (from your CV; use it only if true). I learned to negotiate scope and communicate progress.'}},
+ {t:{es:'Apps y datos',en:'Apps and data'},b:{es:'App móvil con Ionic/Angular y una API REST, sistema de inventario con Python y MySQL, y análisis exploratorio con Pandas. Sirven para decir "entiendo cómo se construye lo que diseño".',en:'A mobile app with Ionic/Angular and a REST API, an inventory system with Python and MySQL, and exploratory analysis with Pandas. They show "I understand how what I design is built".'}},
+ {t:{es:'Plantilla STAR',en:'STAR template'},b:{es:'Situation (contexto) → Task (tu responsabilidad) → Action (lo que TÚ hiciste) → Result (resultado y qué aprendiste). 90 segundos máximo.',en:'Situation (context) → Task (your responsibility) → Action (what YOU did) → Result (outcome and what you learned). 90 seconds max.'}}
+],
+qa:[
+ {q:'Tell me about yourself.',a:{es:'Usa la versión de 1 minuto. Cierra con por qué Nu.',en:'Use the 1-minute pitch. Close with why Nu.'}},
+ {q:'Why Nu? / ¿Por qué Nu?',a:{es:'Misión (luchar contra la complejidad), cliente al centro, transparencia, presencia en Colombia y México. Conecta con un proyecto tuyo.',en:'Mission (fight complexity), customer at the center, transparency, presence in Colombia and Mexico. Link it to one of your projects.'}},
+ {q:'Tell me about a time you faced a challenge.',a:{es:'Historia personal: subestimación familiar + ingeniería → resiliencia. Termina con un resultado concreto (intercambio, proyectos, liderazgo).',en:'Personal story: being underestimated at home + engineering → resilience. End with a concrete result (exchange, projects, leadership).'}},
+ {q:'How do you handle feedback?',a:{es:'Nu valora dar y recibir feedback crítico. Ejemplo: cambiaste un diseño tras una prueba con usuarios.',en:'Nu values giving and receiving critical feedback. Example: you changed a design after a user test.'}},
+ {q:'How do you work with engineers?',a:{es:'Tu ventaja: sabes programar. Habla de handoff, viabilidad y decisiones juntos.',en:'Your edge: you can code. Talk about handoff, feasibility and shared decisions.'}},
+ {q:'How would you improve a Nu app screen?',a:{es:'Primero pregunta: ¿quién es el usuario y cuál es el problema? Luego hipótesis, prototipo rápido, métrica de éxito y prueba.',en:'First ask: who is the user and what is the problem? Then hypothesis, fast prototype, success metric and test.'}},
+ {q:'Tell me about your exchange in Mexico.',a:{es:'Usa la versión de 20 segundos y añade una anécdota breve de adaptación.',en:'Use the 20-second version and add a short adaptation anecdote.'}},
+ {q:'Where do you see yourself in 3 years?',a:{es:'"Being a strong product designer, owning a feature end-to-end, and mentoring others."',en:'"Being a strong product designer, owning a feature end-to-end, and mentoring others."'}},
+ {q:'Do you have experience with research and data?',a:{es:'Sí: investigación de usuario en el proyecto de domicilios, métricas de redes, Pandas/Power BI.',en:'Yes: user research in the delivery project, social metrics, Pandas/Power BI.'}},
+ {q:'¿Cómo manejas la presión o el desacuerdo?',a:{es:'Escucha, usa datos o pruebas con usuarios, propón experimento. Evita sonar a "tengo la razón".',en:'Listen, use data or user tests, propose an experiment. Avoid sounding like "I am right".'}}
+],
+ask:[
+ {es:'¿Cómo está organizado el equipo de Diseño y Research en Colombia, y cómo colabora con México y Brasil?',en:'How is the Design and Research team organized in Colombia, and how does it work with Mexico and Brazil?'},
+ {es:'¿Cómo es un buen primer año para alguien que entra a este equipo?',en:'What does a good first year look like for someone joining this team?'},
+ {es:'¿Cómo usan NuDS y cómo se decide cuándo crear un componente nuevo?',en:'How do you use NuDS, and how do you decide when to create a new component?'},
+ {es:'¿Cómo equilibran velocidad y calidad cuando prueban ideas (test & learn)?',en:'How do you balance speed and quality when testing ideas (test & learn)?'},
+ {es:'¿Qué hace que un diseñador junior crezca rápido aquí?',en:'What helps a junior designer grow fast here?'},
+ {es:'¿Cómo se da feedback en las críticas de diseño?',en:'How is feedback given in design critiques?'},
+ {es:'¿Cómo ven el rol de la IA en el trabajo de diseño en Nu?',en:'How do you see the role of AI in design work at Nu?'},
+ {es:'¿Qué fue lo más retador que el equipo resolvió en el último año?',en:'What was the biggest challenge the team solved in the last year?'},
+ {es:'¿Qué tipo de portafolio o ejercicio práctico esperan en el proceso?',en:'What kind of portfolio or practical exercise do you expect in the process?'},
+ {es:'¿Cuáles son los siguientes pasos del proceso?',en:'What are the next steps in the process?'}
+],
+chk:[
+ {es:'Portafolio en Behance listo y con 2–3 casos con proceso (problema → resultado).',en:'Behance portfolio ready with 2–3 case studies showing process (problem → result).'},
+ {es:'Repasar los 5 valores de Nu con un ejemplo propio para cada uno.',en:'Review Nu\'s 5 values with one personal example for each.'},
+ {es:'Grabar el pitch de 1 min y analizarlo 3 veces; bajar muletillas.',en:'Record the 1-min pitch and analyze it 3 times; reduce filler words.'},
+ {es:'Preparar 5 preguntas para el gerente.',en:'Prepare 5 questions for the manager.'},
+ {es:'Probar cámara, micrófono, internet y luz (si es virtual).',en:'Test camera, microphone, internet and light (if virtual).'},
+ {es:'Revisar el CV: que solo tenga datos que puedas defender.',en:'Review your CV: only include facts you can defend.'},
+ {es:'Dormir bien y llegar 10 minutos antes.',en:'Sleep well and join 10 minutes early.'}
+]};
+const NU_CTX=`Context about Nu (use it; do not invent facts beyond it): Nu serves 140M+ customers in Brazil, Mexico and Colombia. Mission: fight complexity to empower people. Five values: customers love us fanatically; hungry, challenge the status quo; think and act like owners; strong diverse teams; smart efficiency. Design team drives product from ideation to rollout; turns complex problems into intuitive, accessible experiences; collaborates with designers, researchers, analysts, engineers, PMs; values humility, desire to learn, giving and receiving critical feedback. Has NuDS design system, test & learn experimentation, transparency as a design principle.`;
+const PROFILE=`Candidate: Liseth Alejandra Rairán Mendivelso, Colombian, Multimedia Engineering student at Universidad de Boyacá (2022-present), exchange at Universidad Autónoma de Tlaxcala, Mexico (Jan-Jun 2025). English B2. Freelance UX/UI, AR/VR (Unity+Vuforia), web/mobile (Angular, Ionic, TypeScript, Python, MySQL), Adobe suite, Blender, Scrum. Projects: delivery platform redesign, AR cards experience, Pollos El Dorado 50-year campaign, inventory system, EDA with Pandas. Story: dreamed of going far, was underestimated in her family, resilient leader in a tough field.`;
+function render(){
+ document.documentElement.lang=L;
+ document.getElementById('sub').textContent=L=='es'?'Material bilingüe de estudio · Entrevista con el gerente de Diseño de Nu':'Bilingual study kit · Interview with the Nu Design manager';
+ const bar=document.getElementById('bar');bar.innerHTML='';
+ tabs.forEach(([id,n])=>{const b=document.createElement('button');b.textContent=T(n);b.onclick=()=>show(id);b.id='t_'+id;bar.appendChild(b)});
+ bar.insertAdjacentHTML('beforeend','<span class="sp"></span><span class="lang"><button id="le" class="'+(L=='en'?'on':'')+'" onclick="setL(\'en\')">EN</button> <button id="les" class="'+(L=='es'?'on':'')+'" onclick="setL(\'es\')">ES</button></span>');
+ const m=document.getElementById('main');m.innerHTML='';
+ for(const k of ['res','pitch','learn','proj']){m.insertAdjacentHTML('beforeend','<section class="sec" id="s_'+k+'"><div class="grid">'+D[k].map(c=>'<div class="card"><h3>'+T(c.t)+'</h3><p style="white-space:pre-wrap">'+T(c.b)+'</p></div>').join('')+'</div></section>')}
+ m.insertAdjacentHTML('beforeend','<section class="sec" id="s_qa"><div class="card">'+D.qa.map(x=>'<div class="q"><b>'+x.q+'</b><p>'+T(x.a)+'</p></div>').join('')+'<div class="tip">'+(L=='es'?'Responde siempre en inglés, aunque la guía esté en español.':'Always answer in English, even if the guide is in Spanish.')+'</div></div></section>');
+ m.insertAdjacentHTML('beforeend','<section class="sec" id="s_ask"><div class="card"><ol>'+D.ask.map(x=>'<li>'+x.en+'<br><small>'+x.es+'</small></li>').join('')+'</ol></div></section>');
+ m.insertAdjacentHTML('beforeend','<section class="sec" id="s_chk"><div class="card">'+D.chk.map((x,i)=>'<label style="display:block;margin:8px 0"><input type="checkbox" style="width:auto" id="c'+i+'" onchange="localStorage.setItem(\'c'+i+'\',this.checked)"> '+T(x)+'</label>').join('')+'</div></section>');
+ m.insertAdjacentHTML('beforeend',labHTML());
+ D.chk.forEach((x,i)=>{document.getElementById('c'+i).checked=localStorage.getItem('c'+i)=='true'});
+ setMode();show(cur);
+}
+let cur='res';
+function show(id){cur=id;document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id=='s_'+id));document.querySelectorAll('.bar button[id^=t_]').forEach(b=>b.classList.toggle('on',b.id=='t_'+id))}
+function setL(l){L=l;render()}
+function labHTML(){const es=L=='es';return `<section class="sec" id="s_lab"><div class="grid">
+<div class="card"><h3>${es?'Grabar':'Record'}</h3>
+<p><small>${es?'La IA ya está configurada. Solo graba o sube un audio y listo.':'The AI is already set up. Just record or upload an audio file and you are ready.'}</small></p>
+<select id="mode" onchange="setMode()"><option value="pitch">${es?'A · Mi presentación (te evalúa el gerente)':'A · My pitch (manager evaluates)'}</option><option value="answer">${es?'B · Respondo una pregunta del gerente':'B · I answer a manager question'}</option><option value="ask">${es?'C · Yo le hago una pregunta al gerente':'C · I ask the manager a question'}</option></select>
+<div id="qbox" class="hide"><p><button class="btn gray" onclick="rndQ()">${es?'Pregunta aleatoria':'Random question'}</button></p><textarea id="qtxt" placeholder="${es?'Pregunta del gerente (o la tuya en modo C)':'Manager question (or yours in mode C)'}"></textarea></div>
+<p><button class="btn" id="rec" onclick="startRec()">● ${es?'Grabar':'Record'}</button><button class="btn red" id="stop" onclick="stopRec()" disabled>■ ${es?'Detener':'Stop'}</button><span id="timer" class="stat">0:00</span></p>
+<audio id="aud" controls class="hide"></audio>
+<p><input type="file" id="file" accept="audio/*,video/*" onchange="fileIn(this)"><small>${es?'o sube un audio ya grabado':'or upload an existing audio file'}</small></p>
+<button class="btn" id="go" onclick="analyze()" disabled>${es?'Transcribir y analizar':'Transcribe and analyze'}</button>
+<p id="status"><small></small></p></div></div>
+<div class="card" style="margin-top:16px"><h3>${es?'Transcripción':'Transcript'}</h3><div id="stats"></div><div class="out" id="tr">—</div>
+<h3 style="margin-top:14px">${es?'Feedback del gerente de Diseño':'Design manager feedback'}</h3><div class="out" id="fb">—</div>
+<button class="btn gray" onclick="copyAll()">${es?'Copiar todo (para otra IA)':'Copy all (for another AI)'}</button></div></section>`}
+function setMode(){const m=document.getElementById('mode').value;document.getElementById('qbox').classList.toggle('hide',m=='pitch')}
+function rndQ(){const q=D.qa[Math.floor(Math.random()*D.qa.length)].q;document.getElementById('qtxt').value=q}
+let mr,chunks=[],blob=null,t0,tint;
+async function startRec(){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});mr=new MediaRecorder(s);chunks=[];mr.ondataavailable=e=>chunks.push(e.data);
+ mr.onstop=()=>{blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});const a=document.getElementById('aud');a.src=URL.createObjectURL(blob);a.classList.remove('hide');document.getElementById('go').disabled=false;s.getTracks().forEach(t=>t.stop());clearInterval(tint)};
+ mr.start();t0=Date.now();tint=setInterval(()=>{const x=Math.floor((Date.now()-t0)/1000);document.getElementById('timer').textContent=Math.floor(x/60)+':'+String(x%60).padStart(2,'0')},500);
+ document.getElementById('rec').disabled=true;document.getElementById('stop').disabled=false}catch(e){st('Mic error: '+e.message)}}
+function stopRec(){mr.stop();document.getElementById('rec').disabled=false;document.getElementById('stop').disabled=true}
+function fileIn(i){const f=i.files[0];if(!f)return;blob=f;const a=document.getElementById('aud');a.src=URL.createObjectURL(f);a.classList.remove('hide');document.getElementById('go').disabled=false}
+function st(t){document.querySelector('#status small').textContent=t}
+const FILL=['um','uh','uhm','like','you know','i mean','basically','actually','so','well','eh','este','o sea','como que','pues','mmm','digamos','tipo','entonces'];
+function stats(txt,secs){const w=txt.toLowerCase().replace(/[^\p{L}\s']/gu,' ').split(/\s+/).filter(Boolean);const n=w.length;const joined=' '+w.join(' ')+' ';const f={};FILL.forEach(x=>{const c=joined.split(' '+x+' ').length-1;if(c>0)f[x]=c});
+ const wpm=secs?Math.round(n/(secs/60)):'—';const es=L=='es';
+ document.getElementById('stats').innerHTML='<span class="stat">'+(es?'Palabras: ':'Words: ')+n+'</span><span class="stat">WPM: '+wpm+'</span>'+Object.entries(f).map(([k,v])=>'<span class="stat">"'+k+'" × '+v+'</span>').join('');
+ return `Words: ${n}; approx words per minute: ${wpm}; possible filler words (local count, may include normal uses): ${JSON.stringify(f)}`}
+async function analyze(){const go=document.getElementById('go');go.disabled=true;st('Transcribing…');
+ try{const fd=new FormData();fd.append('file',blob,'audio.webm');fd.append('model',GROQ_STT);fd.append('response_format','verbose_json');fd.append('temperature','0');
+  let r=await fetch(API_BASE+'/api/groq?endpoint=transcribe',{method:'POST',headers:{'X-Nu-Lab':'1'},body:fd});
+  if(!r.ok)throw new Error(await r.text());const j=await r.json();const txt=j.text||'';document.getElementById('tr').textContent=txt;
+  const segs=j.segments||[];const secs=j.duration||(segs.length?segs[segs.length-1].end:0);const pauses=[];for(let i=1;i<segs.length;i++){const g=segs[i].start-segs[i-1].end;if(g>1.5)pauses.push(g.toFixed(1)+'s')}
+  const sx=stats(txt,secs)+`; duration: ${Math.round(secs)}s; long pauses (>1.5s): ${pauses.length?pauses.join(', '):'none'}`;
+  st('Analyzing…');const mode=document.getElementById('mode').value;const q=document.getElementById('qtxt').value;const fl=FEEDBACK_LANG;
+  let task;if(mode=='pitch')task=`The candidate just gave her self-introduction/pitch. Evaluate it.`;
+  else if(mode=='answer')task=`You asked this question: "${q}". The candidate answered. Evaluate the answer (STAR structure, relevance, concreteness, link to Nu values).`;
+  else task=`The candidate is asking YOU this question as the manager: "${q}" (the transcript is how she asked it). First evaluate how she asked it (clarity, relevance, curiosity). Then answer her question as the Nu design manager, grounded in the Nu context and publicly known information; if you are not sure about something, say you can't confirm instead of inventing.`;
+  const sys=`You are a friendly but honest Design area manager at Nu (Nubank) interviewing a junior product design candidate. Not strict, supportive, realistic. ${NU_CTX}\n${PROFILE}\nThe interview is in English; the candidate's English is B2. Write the feedback in ${fl}, but quote her English phrases as-is. Structure: 1) Overall impression (score /10) 2) Content vs. what Nu expects (values, design mindset, evidence) 3) Delivery: clarity, grammar, vocabulary, filler words and pauses (use the metrics) 4) Top 3 strengths 5) Top 3 improvements with a better rewritten sentence in English for each 6) A follow-up question you would ask next. Be concise and practical.`;
+  const body={model:GROQ_MODEL,temperature:0.5,messages:[{role:'system',content:sys},{role:'user',content:`${task}\n\nTranscript:\n"""${txt}"""\n\nMetrics: ${sx}`}]};
+  r=await fetch(API_BASE+'/api/groq?endpoint=chat',{method:'POST',headers:{'X-Nu-Lab':'1','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(await r.text());const c=await r.json();document.getElementById('fb').textContent=c.choices[0].message.content;st('✓ OK')
+ }catch(e){st('Error: '+e.message.slice(0,300))}go.disabled=false}
+function copyAll(){navigator.clipboard.writeText('TRANSCRIPT:\n'+document.getElementById('tr').textContent+'\n\nFEEDBACK:\n'+document.getElementById('fb').textContent)}
+render();
+const bb=document.getElementById('bb');
+const MSG={es:{idle:['¡Tú puedes, Liseth! 💜','Respira. Habla despacio.','¡Está sonando bien!','Sigue así, estoy contigo.','Recuerda: pausa en vez de “eh”.','¡Ese es el espíritu Nu!'],rec:['Te escucho… ve con calma.','¡Muy bien! Sigue así.','Estoy tomando notas 💜','Respira… tú puedes.','¡Qué bien lo estás haciendo!'],done:['¡Listo! Revisemos juntos.','¡Lo lograste! Veamos el feedback.','¡Buen trabajo! Ahora a mejorar 💜'],err:['Ups, algo falló. Intenta de nuevo.','No pasa nada, inténtalo otra vez.']},
+en:{idle:['You got this, Liseth! 💜','Breathe. Speak slowly.','You sound great!','Keep going, I am with you.','Pause instead of “uh”.','That is the Nu spirit!'],rec:['I am listening… take your time.','Nice! Keep going.','I am taking notes 💜','Breathe… you can do it.','You are doing great!'],done:['Done! Let us review together.','You did it! Let us check the feedback.','Great job! Now let us improve 💜'],err:['Oops, something failed. Try again.','No worries, try again.']}};
+let bt;
+function say(k){const a=MSG[L][k];bb.textContent=a[Math.floor(Math.random()*a.length)];bb.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>bb.classList.remove('show'),3500)}
+say('idle');setInterval(()=>{if(!document.getElementById('rec').disabled)say('rec');else say('idle')},12000);
+</script></body></html>

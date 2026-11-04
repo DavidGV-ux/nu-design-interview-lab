@@ -1,0 +1,8 @@
+{
+  "name": "nu-interview-lab-api",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
